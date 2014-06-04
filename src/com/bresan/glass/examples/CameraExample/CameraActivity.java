@@ -19,6 +19,7 @@ public class CameraActivity extends Activity {
 	private SurfaceHolder surfaceHolder;
 	private Camera camera;
 	private boolean previewOn;
+	private final static int FPS_LIMIT = 5000;
 
 	Context context = this;
 
@@ -82,7 +83,7 @@ public class CameraActivity extends Activity {
 				try {
 					// This camera parameter is set to fix a bug in XE12 that garbles the preview
 					Camera.Parameters params = camera.getParameters();
-					params.setPreviewFpsRange(5000, 5000);
+					params.setPreviewFpsRange(FPS_LIMIT, FPS_LIMIT);
 					camera.setParameters(params);
 
 					// Start the preview
