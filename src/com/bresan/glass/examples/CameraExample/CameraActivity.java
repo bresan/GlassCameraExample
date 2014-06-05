@@ -1,35 +1,24 @@
 package com.bresan.glass.examples.CameraExample;
 
+import java.io.IOException;
+
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
-import android.media.AudioManager; // For option 2
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.KeyEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.google.android.glass.media.Sounds; // For option 2
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+//Special thanks to Nortom Lam for camera example source
 
 public class CameraActivity extends Activity {
 	private SurfaceHolder surfaceHolder;
 	private Camera camera;
 	private boolean previewOn;
-
-	Context context = this;
+	private final static int CAMERA_FPS = 5000;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -37,7 +26,7 @@ public class CameraActivity extends Activity {
 
 		setContentView(R.layout.camera_preview);
 
-		// Set up the camera preview UX
+		// Set up the camera preview user interface
 		getWindow().setFormat(PixelFormat.UNKNOWN);
 		SurfaceView surfaceView = (SurfaceView) findViewById(R.id.camerapreview);
 		surfaceHolder = surfaceView.getHolder();
@@ -47,39 +36,24 @@ public class CameraActivity extends Activity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		switch (keyCode) {
-		// Hardware camera button
-		case KeyEvent.KEYCODE_CAMERA: {
+		case KeyEvent.KEYCODE_CAMERA: { // camera button (hardware)
 
-			// Release the camera before the picture is taken
-			camera.stopPreview();
-			camera.release();
+			camera.stopPreview(); // stop the preview
+			camera.release(); // release the camera
 			previewOn = false;
 
 			// Return false to allow the camera button to do its default action
 			return false;
 		}
-		// Touchpad tap
-		case KeyEvent.KEYCODE_DPAD_CENTER: // Alternative way to take a picture
+		case KeyEvent.KEYCODE_DPAD_CENTER: // touchpad tap
 		case KeyEvent.KEYCODE_ENTER: {
-			android.util.Log.d("CameraActivity", "Tap.");
 
-			// Option 1: release the camera and use the ACTION_IMAGE_CAPTURE intent
 			camera.stopPreview();
 			camera.release();
 			previewOn = false; // Don't release the camera in surfaceDestroyed()
 
-			// Use the image capture intent to take the picture and process it with onActivityResult()
-			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE); // capture image
 			startActivityForResult(intent, 0);
-
-			// Option 2: capture the picture yourself and process it with a Camera.PictureCallback
-
-			// Play a sound to indicate the take picture action succeeded
-			// AudioManager audio = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-			// audio.playSoundEffect(Sounds.SUCCESS);
-
-			// Take the picture
-			// camera.takePicture(null, null, new SavePicture());
 
 			return true;
 		}
@@ -92,25 +66,23 @@ public class CameraActivity extends Activity {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (RESULT_OK == resultCode) {
-			// Do something
+			// want to do something after taking the picture?
 		}
 
 		super.onActivityResult(requestCode, resultCode, data);
 	}
 
-	// Handling of the camera preview
+	// camera preview stuff
 	class SurfaceHolderCallback implements SurfaceHolder.Callback {
 		@Override
 		public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 			if (null != camera) {
 
 				try {
-					// This camera parameter is set to fix a bug in XE12 that garbles the preview
-					Camera.Parameters params = camera.getParameters();
-					params.setPreviewFpsRange(5000, 5000);
+					Camera.Parameters params = camera.getParameters(); // must change the camera parameters to fix a bug in XE1
+					params.setPreviewFpsRange(CAMERA_FPS, CAMERA_FPS);
 					camera.setParameters(params);
 
-					// Start the preview
 					camera.setPreviewDisplay(surfaceHolder);
 					camera.startPreview();
 					previewOn = true;
@@ -128,9 +100,8 @@ public class CameraActivity extends Activity {
 		@Override
 		public void surfaceDestroyed(SurfaceHolder holder) {
 			if (previewOn) {
-				// Stop the preview and release the camera
-				camera.stopPreview();
-				camera.release();
+				camera.stopPreview(); //stop the preview
+				camera.release();  //release the camera for using it later (or if another app want to use)
 			}
 		}
 	}
