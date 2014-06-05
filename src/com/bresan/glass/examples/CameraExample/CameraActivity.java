@@ -16,7 +16,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 public class CameraActivity extends Activity {
-	
+
 	private SurfaceHolder surfaceHolder;
 	private Camera camera;
 	private boolean previewOn;
@@ -39,15 +39,15 @@ public class CameraActivity extends Activity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		switch (keyCode) {
-		case KeyEvent.KEYCODE_CAMERA: { // if user press the camera button
-			camera.stopPreview(); // stop the live preview
+		case KeyEvent.KEYCODE_CAMERA: {
+			camera.stopPreview();
 			camera.release();
 			previewOn = false;
 
 			return false;
 		}
 
-		case KeyEvent.KEYCODE_DPAD_CENTER: // or if user taps the touchpad
+		case KeyEvent.KEYCODE_DPAD_CENTER: // Alternative way to take a picture
 		case KeyEvent.KEYCODE_ENTER: {
 
 			camera.stopPreview();
